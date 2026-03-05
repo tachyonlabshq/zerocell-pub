@@ -5,7 +5,7 @@
             "type": "local",
             "command": [
                 "./bin/zerocell-macos",
-                "mcp"
+                "mcp-stdio"
             ],
             "enabled": true
         }
