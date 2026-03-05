@@ -4,6 +4,13 @@ Welcome to the ZeroCell Skill repository.
 
 This repository contains the hardened, single-binary distribution of the ZeroCell Skill for OpenCode — injecting Excel AI matrix intelligence directly into your LLM workflow.
 
+## Key Features
+
+- **Direct Cell Patching**: Patch Excel files cell-by-cell natively (e.g. `{"Sheet1": {"A1": "New Value", "B2": "=SUM(A1:A2)"}}`) without hallucinating massive 2D arrays.
+- **Native Formula Recalculation**: Force-evaluate complex spreadsheet models exactly like the Excel UI via the `recalculate_workbook` tool. 
+- **Financial Validation & Inspection**: Validate formulas, extract parallel `values` and `formulas` matrices, and generate structural diffs before applying changes.
+- **Enterprise Controls**: Includes telemetry tracking, rollback policies, and PII-redacted safe-read operations.
+
 ## Installation
 
 Clone or download this repository:
