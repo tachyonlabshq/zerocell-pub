@@ -46,9 +46,32 @@ This document defines the stable contract for using ZeroCell as an AI skill thro
 - `skill_api_contract`
 - `runtime_observability`
 
-## Fallback Policies
+## Patching Workflow (Propose -> Validate -> Apply)
 
-### `read_matrix_resilient`
+To modify a workbook, follow this 3-step sequence:
+
+1. **propose_patch**: Generate a structural patch from simple key-value changes.
+   - **Payload Format**: `{"SheetName": {"A1": "New Value", "B2": "=C2*1.1"}}`
+   - Returns: A `WorkbookPatch` object.
+2. **validate_patch**: (Optional but Recommended) Run the patch against a policy.
+   - Requires: `workbook_path` and the `patch` from step 1.
+3. **apply_patch**: Commit the changes to a new file.
+   - Requires: `workbook_path`, `patch`, and `output_path`.
+
+### Example Payload
+```json
+{
+  "Data Log": {
+    "A8": "Division 99",
+    "B8": "Special Ops",
+    "C8": "=SUM(D1:D10)"
+  }
+}
+```
+
+### Response Status Guarantees
+
+#### `read_matrix_resilient`
 
 - Trigger: requested sheet not found.
 - Behavior: returns `status: fallback_sheet_suggestion` and fallback metadata.
