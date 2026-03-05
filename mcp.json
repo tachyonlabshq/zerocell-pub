@@ -1,0 +1,18 @@
+{
+    "mcpServers": {
+        "zerocell-macos": {
+            "command": "./bin/zerocell-macos",
+            "args": [
+                "mcp"
+            ],
+            "env": {}
+        },
+        "zerocell-windows": {
+            "command": ".\\bin\\zerocell-windows.exe",
+            "args": [
+                "mcp"
+            ],
+            "env": {}
+        }
+    }
+}
