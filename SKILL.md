@@ -87,6 +87,41 @@ To modify a workbook, follow this 3-step sequence:
 - Behavior: returns telemetry summary with failure and fallback distribution.
 - Failure mode: explicit IO diagnostic if telemetry file path does not exist.
 
+## Requirements for Outputs
+
+### All Excel files
+
+- **Professional Font**: Use a consistent, professional font (e.g., Arial, Times New Roman) for all deliverables.
+- **Zero Formula Errors**: Every Excel model MUST be delivered with ZERO formula errors (`#REF!`, `#DIV/0!`, `#VALUE!`, `#N/A`, `#NAME?`).
+- **Preserve Existing Templates**: Exactly match existing format, style, and conventions when modifying templates. Never impose standardized formatting on files with established patterns.
+
+### Formulas vs Hardcodes (CRITICAL RULE)
+
+- **Always use Excel formulas instead of calculating values and hardcoding them.** This ensures the spreadsheet remains dynamic and updateable.
+- Provide cell references instead of hardcoded values in formulas (e.g., use `=B5*(1+$B$6)` instead of `=B5*1.05`).
+- If you must add hardcoded inputs based on research, document them! Comment or place notes beside the table: `"Source: [Document], [Date], [Reference]"`.
+
+### Recalculating Formulas
+
+- ZeroCell includes formula recalculation capabilities through the `recalculate_workbook` tool (via LibreOffice headless). You **MUST** run this tool after applying patches that inject new formulas to ensure the workbook evaluates correctly and there are no `#VALUE!` or `#REF!` errors.
+
+### Financial Models
+
+#### Color Coding Standards
+
+- **Blue text**: Hardcoded inputs.
+- **Black text**: ALL formulas and calculations.
+- **Green text**: Links pulling from other worksheets within the same workbook.
+- **Red text**: External links to other files.
+- **Yellow background**: Key assumptions needing attention.
+
+#### Number Formatting Standards
+
+- **Years**: Format as text strings (e.g., `"2024"` not `"2,024"`).
+- **Currency**: ALWAYS specify units in headers (`"Revenue ($mm)"`).
+- **Zeros**: Use number formatting to make all zeros `-`, including percentages.
+- **Percentages**: Default to `0.0%` format (one decimal).
+
 ## Changelog Policy Link
 
 See [CHANGELOG_POLICY.md](/Users/michaelwong/Developer/ZeroCell/docs/CHANGELOG_POLICY.md).
