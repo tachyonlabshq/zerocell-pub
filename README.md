@@ -1,61 +1,94 @@
 # ZeroCell Skill for OpenCode
 
-Welcome to the ZeroCell Skill repository. 
+Welcome to the ZeroCell Skill repository.
 
-This repository contains the hardened, obfuscated, single-binary distribution of the ZeroCell Skill for OpenCode. It provides a massive leap in spreadsheet intelligence by injecting an Excel AI matrix directly into the context of your LLM workflow.
+This repository contains the hardened, single-binary distribution of the ZeroCell Skill for OpenCode — injecting Excel AI matrix intelligence directly into your LLM workflow.
 
-## Installation Instructions
+## Installation
 
-To install the ZeroCell skill and MCP integration for OpenCode on macOS or Windows, follow these simple steps:
-
-### 1. Download the Repository
-Clone or download this repository to a secure location on your machine.
+Clone or download this repository:
 ```bash
 git clone https://github.com/tachyonlabshq/zerocell-pub.git
 cd zerocell-pub
 ```
 
-### 2. Configure OpenCode MCP
-OpenCode connects to ZeroCell using the Model Context Protocol (MCP).
+### macOS (Apple Silicon)
 
-1. Open your OpenCode Settings.
-2. Navigate to the **MCP Servers** configuration section.
-3. Add a new MCP server configuration using the specific paths for your operating system based on where you downloaded this repository.
-
-#### macOS Configuration
+Add to your project's `opencode.json`:
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
   "mcp": {
     "zerocell": {
       "type": "local",
-      "command": ["/path/to/zerocell-pub/bin/zerocell-macos", "mcp"],
+      "command": ["/path/to/zerocell-pub/bin/zerocell-macos-arm64", "mcp-stdio"],
       "enabled": true
     }
   }
 }
 ```
 
-#### Windows Configuration
+Grant execute permission if needed:
+```bash
+chmod +x bin/zerocell-macos-arm64
+```
+
+### macOS (Intel)
+
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
   "mcp": {
     "zerocell": {
       "type": "local",
-      "command": ["C:\\path\\to\\zerocell-pub\\bin\\zerocell-windows.exe", "mcp"],
+      "command": ["/path/to/zerocell-pub/bin/zerocell-macos-x64", "mcp-stdio"],
       "enabled": true
     }
   }
 }
 ```
 
-### 3. Grant Permissions
-- **macOS Users:** You may need to grant execution permissions to the binary if it was downloaded via Safari or Mail.
-  ```bash
-  chmod +x bin/zerocell-macos
-  ```
-- **Windows Users:** If you receive a SmartScreen warning, click "More info" and "Run anyway".
+```bash
+chmod +x bin/zerocell-macos-x64
+```
 
-### 4. Enable the Skill
-Once the MCP server is connected, the `@ZeroCell` skill will be available in your OpenCode prompt. Use it to instantly decompose, analyze, and query massive Excel workbooks!
+### Windows (x64)
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "zerocell": {
+      "type": "local",
+      "command": ["C:\\path\\to\\zerocell-pub\\bin\\zerocell-windows-x64.exe", "mcp-stdio"],
+      "enabled": true
+    }
+  }
+}
+```
+
+### Windows (ARM64)
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "zerocell": {
+      "type": "local",
+      "command": ["C:\\path\\to\\zerocell-pub\\bin\\zerocell-windows-arm64.exe", "mcp-stdio"],
+      "enabled": true
+    }
+  }
+}
+```
+
+> **Note for Windows users**: If SmartScreen warns you, click "More info" → "Run anyway".
+
+## Available Binaries
+
+| File | Platform |
+|------|----------|
+| `bin/zerocell-macos-arm64` | macOS Apple Silicon (M1/M2/M3/M4) |
+| `bin/zerocell-macos-x64` | macOS Intel |
+| `bin/zerocell-windows-x64.exe` | Windows x64 |
+| `bin/zerocell-windows-arm64.exe` | Windows ARM64 (Copilot+ PCs) |
