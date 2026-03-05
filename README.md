@@ -25,11 +25,12 @@ OpenCode connects to ZeroCell using the Model Context Protocol (MCP).
 #### macOS Configuration
 ```json
 {
-  "mcpServers": {
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
     "zerocell": {
-      "command": "/path/to/zerocell-pub/bin/zerocell-macos",
-      "args": ["mcp"],
-      "env": {}
+      "type": "local",
+      "command": ["/path/to/zerocell-pub/bin/zerocell-macos", "mcp"],
+      "enabled": true
     }
   }
 }
@@ -38,11 +39,12 @@ OpenCode connects to ZeroCell using the Model Context Protocol (MCP).
 #### Windows Configuration
 ```json
 {
-  "mcpServers": {
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
     "zerocell": {
-      "command": "C:\\path\\to\\zerocell-pub\\bin\\zerocell-windows.exe",
-      "args": ["mcp"],
-      "env": {}
+      "type": "local",
+      "command": ["C:\\path\\to\\zerocell-pub\\bin\\zerocell-windows.exe", "mcp"],
+      "enabled": true
     }
   }
 }

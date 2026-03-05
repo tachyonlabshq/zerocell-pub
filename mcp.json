@@ -1,18 +1,13 @@
 {
-    "mcpServers": {
-        "zerocell-macos": {
-            "command": "./bin/zerocell-macos",
-            "args": [
+    "$schema": "https://opencode.ai/config.json",
+    "mcp": {
+        "zerocell": {
+            "type": "local",
+            "command": [
+                "./bin/zerocell-macos",
                 "mcp"
             ],
-            "env": {}
-        },
-        "zerocell-windows": {
-            "command": ".\\bin\\zerocell-windows.exe",
-            "args": [
-                "mcp"
-            ],
-            "env": {}
+            "enabled": true
         }
     }
 }
