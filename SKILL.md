@@ -76,6 +76,20 @@ To modify a workbook, follow this 3-step sequence:
 
 ### Response Status Guarantees
 
+#### `query_sheet`
+
+- Preferred arguments: `workbook_path`, `sheet_name`, and a narrow `range`.
+- Accepted aliases:
+  - `workbook`, `path`, `file_path` for `workbook_path`
+  - `sheet`, `worksheet`, `tab_name` for `sheet_name`
+  - nested objects under `request`, `payload`, `input`, or `query`
+- Behavior when `range` is omitted:
+  - the response is clipped to a default window (`50` rows x `26` columns) to avoid oversized tool output
+  - `bounded_by_default_window = true` and `response_note` explain the clipping when it happens
+- Recommendation:
+  - call `inspect_workbook` first if the sheet is uncertain
+  - call `query_sheet` with `range` for agent loops and large workbooks
+
 #### `read_matrix_resilient`
 
 - Trigger: requested sheet not found.
