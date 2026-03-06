@@ -50,18 +50,23 @@ This document defines the stable contract for using ZeroCell as an AI skill thro
 
 To modify a workbook, follow this 3-step sequence:
 
-1. **propose_patch**: Generate a structural patch from simple key-value changes.
-   - **Payload Format**: `{"SheetName": {"A1": "New Value", "B2": "=C2*1.1"}}`
+1. **propose_patch**: Generate a structural patch from cell-level or matrix-level changes.
+   - **Preferred input**: `{"workbook_path":"...","sheet_name":"Model","cell_map":{"A1":"New Value","B2":"=C2*1.1"}}`
+   - **Legacy input (still supported)**:
+     - `{"workbook_path":"...","payload":{"sheet":"Model","cell_map":{"A1":"New Value"}}}`
+     - `{"workbook_path":"...","payload":{"sheet":"Model","matrices":{"values":[...],"formulas":[...]}}}`
    - Returns: A `WorkbookPatch` object.
 2. **validate_patch**: (Optional but Recommended) Run the patch against a policy.
    - Requires: `workbook_path` and the `patch` from step 1.
 3. **apply_patch**: Commit the changes to a new file.
    - Requires: `workbook_path`, `patch`, and `output_path`.
 
-### Example Payload
+### Example Preferred Input
 ```json
 {
-  "Data Log": {
+  "workbook_path": "book.xlsx",
+  "sheet_name": "Data Log",
+  "cell_map": {
     "A8": "Division 99",
     "B8": "Special Ops",
     "C8": "=SUM(D1:D10)"
