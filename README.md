@@ -7,7 +7,7 @@ This repository contains the hardened, single-binary distribution of the ZeroCel
 ## Key Features
 
 - **Direct Cell Patching**: Patch Excel files cell-by-cell natively (e.g. `{"Sheet1": {"A1": "New Value", "B2": "=SUM(A1:A2)"}}`) without hallucinating massive 2D arrays.
-- **Native Formula Recalculation**: Force-evaluate complex spreadsheet models exactly like the Excel UI via the `recalculate_workbook` tool. 
+- **Native Formula Recalculation**: Force-evaluate complex spreadsheet models exactly like the Excel UI via the `recalculate_workbook` tool.
 - **Financial Validation & Inspection**: Validate formulas, extract parallel `values` and `formulas` matrices, and generate structural diffs before applying changes.
 - **Enterprise Controls**: Includes telemetry tracking, rollback policies, and PII-redacted safe-read operations.
 
@@ -18,6 +18,8 @@ Clone or download this repository:
 git clone https://github.com/tachyonlabshq/zerocell-pub.git
 cd zerocell-pub
 ```
+
+The distribution includes the helper scripts used by `recalculate_workbook` under `scripts/`. The binary resolves them relative to itself, so recalculation works even when the current working directory is a different project.
 
 ### macOS (Apple Silicon)
 
@@ -99,3 +101,10 @@ chmod +x bin/zerocell-macos-x64
 | `bin/zerocell-macos-x64` | macOS Intel |
 | `bin/zerocell-windows-x64.exe` | Windows x64 |
 | `bin/zerocell-windows-arm64.exe` | Windows ARM64 (Copilot+ PCs) |
+
+## Recalculation Notes
+
+- `recalculate_workbook` requires LibreOffice plus Python.
+- Override the helper script path with `ZEROCELL_RECALC_SCRIPT` if needed.
+- Override the Python interpreter with `ZEROCELL_PYTHON_BIN` if needed.
+- Windows recalculation uses the bundled helper path and does not rely on `AF_UNIX`.

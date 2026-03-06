@@ -109,6 +109,9 @@ To modify a workbook, follow this 3-step sequence:
 ### Recalculating Formulas
 
 - ZeroCell includes formula recalculation capabilities through the `recalculate_workbook` tool (via LibreOffice headless). You **MUST** run this tool after applying patches that inject new formulas to ensure the workbook evaluates correctly and there are no `#VALUE!` or `#REF!` errors.
+- The public distribution ships the helper scripts under `scripts/`, and the binary resolves them relative to itself.
+- Windows recalculation does not rely on `AF_UNIX`; it uses the bundled helper path and native subprocess timeouts.
+- Override paths with `ZEROCELL_RECALC_SCRIPT` and `ZEROCELL_PYTHON_BIN` if your environment requires custom locations.
 
 ### Financial Models
 
