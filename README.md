@@ -9,6 +9,7 @@ This repository contains the hardened, single-binary distribution of the ZeroCel
 - **Direct Cell Patching**: Patch Excel files cell-by-cell natively (e.g. `{"Sheet1": {"A1": "New Value", "B2": "=SUM(A1:A2)"}}`) without hallucinating massive 2D arrays.
 - **Native Formula Recalculation**: Force-evaluate complex spreadsheet models exactly like the Excel UI via the `recalculate_workbook` tool.
 - **Bounded Sheet Queries**: `query_sheet` accepts `workbook_path`/`sheet_name` aliases (`path`, `workbook`, `sheet`, `worksheet`) and clips no-range responses to a safe default window so agents do not loop on oversized output.
+- **Columnar Analytics Layer**: ZeroCell now uses Polars for bounded matrix analytics such as sparse extraction and inspection summaries, while keeping Excel read/write on the workbook-safe engine.
 - **Financial Validation & Inspection**: Validate formulas, extract parallel `values` and `formulas` matrices, and generate structural diffs before applying changes.
 - **Enterprise Controls**: Includes telemetry tracking, rollback policies, and PII-redacted safe-read operations.
 
