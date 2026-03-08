@@ -7,7 +7,7 @@ This document defines the stable contract for using ZeroCell as an AI skill thro
 ## Version Contract
 
 - Contract version: `2026.03`
-- Tool schema version: `1.2.0`
+- Tool schema version: `1.9.0`
 - Minimum compatible tool schema version: `1.0.0`
 - Patch schema version: `1.0`
 - Compatibility model: additive fields in minor versions, breaking changes only in major versions.
@@ -19,12 +19,22 @@ This document defines the stable contract for using ZeroCell as an AI skill thro
 - `read-safe`
 - `context`
 - `query-sheet`
+- `profile-sheet`
+- `scan-sheet-anomalies`
+- `scan-workbook-anomalies`
+- `join-sources`
+- `scan-agent-comments`
+- `sync-agent-tasks`
+- `set-agent-task-status`
+- `resolve-agent-task-context`
 - `inspect-workbook`
 - `inspect-sheet`
 - `propose-patch`
 - `validate-patch`
 - `apply-patch`
 - `update`
+- `doctor`
+- `init`
 - `schema-info`
 - `skill-api-contract`
 - `runtime-observability`
@@ -36,124 +46,39 @@ This document defines the stable contract for using ZeroCell as an AI skill thro
 - `read_matrix_resilient`
 - `read_matrix_safe`
 - `inspect_workbook`
+- `profile_sheet`
+- `scan_sheet_anomalies`
+- `scan_workbook_anomalies`
+- `join_sources`
 - `inspect_sheet_context`
+- `query_sheet`
+- `scan_agent_comments`
+- `sync_agent_tasks`
+- `update_agent_task_status`
+- `resolve_agent_task_context`
 - `propose_patch`
 - `validate_patch`
 - `apply_patch`
-- `query_sheet`
 - `finance_analyze`
+- `doctor_environment`
 - `schema_info`
 - `skill_api_contract`
 - `runtime_observability`
 
-## Patching Workflow (Propose -> Validate -> Apply)
+## Operational Notes
 
-To modify a workbook, follow this 3-step sequence:
+- Preferred query arguments remain `workbook_path`, `sheet_name`, and a narrow `range`.
+- `query_sheet` clips omitted-range responses to a safe `50 x 26` default window.
+- `profile_sheet` returns inferred headers, column types, confidence scores, and representative samples.
+- `scan_sheet_anomalies` flags duplicate headers, mixed types, sparse columns, partial formula coverage, and numeric outliers.
+- `scan_workbook_anomalies` aggregates sheet findings and cross-sheet type conflicts.
+- `join_sources` aligns workbook sources by key. Sources may be sheet names or named ranges using `named:RangeName`.
+- `scan_agent_comments` detects workbook comments/notes tagged with `@agent` and extracts explicit references.
+- `sync_agent_tasks` and `resolve_agent_task_context` provide workbook-native orchestration state.
+- `recalculate_workbook` relies on bundled helper scripts under `scripts/` and does not use `AF_UNIX` on Windows.
 
-1. **propose_patch**: Generate a structural patch from cell-level or matrix-level changes.
-   - **Preferred input**: `{"workbook_path":"...","sheet_name":"Model","cell_map":{"A1":"New Value","B2":"=C2*1.1"}}`
-   - **Legacy input (still supported)**:
-     - `{"workbook_path":"...","payload":{"sheet":"Model","cell_map":{"A1":"New Value"}}}`
-     - `{"workbook_path":"...","payload":{"sheet":"Model","matrices":{"values":[...],"formulas":[...]}}}`
-   - Returns: A `WorkbookPatch` object.
-2. **validate_patch**: (Optional but Recommended) Run the patch against a policy.
-   - Requires: `workbook_path` and the `patch` from step 1.
-3. **apply_patch**: Commit the changes to a new file.
-   - Requires: `workbook_path`, `patch`, and `output_path`.
+## Publish Notes
 
-### Example Preferred Input
-```json
-{
-  "workbook_path": "book.xlsx",
-  "sheet_name": "Data Log",
-  "cell_map": {
-    "A8": "Division 99",
-    "B8": "Special Ops",
-    "C8": "=SUM(D1:D10)"
-  }
-}
-```
-
-### Response Status Guarantees
-
-#### `query_sheet`
-
-- Preferred arguments: `workbook_path`, `sheet_name`, and a narrow `range`.
-- Accepted aliases:
-  - `workbook`, `path`, `file_path` for `workbook_path`
-  - `sheet`, `worksheet`, `tab_name` for `sheet_name`
-  - nested objects under `request`, `payload`, `input`, or `query`
-- Behavior when `range` is omitted:
-  - the response is clipped to a default window (`50` rows x `26` columns) to avoid oversized tool output
-  - `bounded_by_default_window = true` and `response_note` explain the clipping when it happens
-- Recommendation:
-  - call `inspect_workbook` first if the sheet is uncertain
-  - call `query_sheet` with `range` for agent loops and large workbooks
-
-#### `read_matrix_resilient`
-
-- Trigger: requested sheet not found.
-- Behavior: returns `status: fallback_sheet_suggestion` and fallback metadata.
-- Response guarantees:
-  - `fallback.used = true`
-  - `fallback.reason_code = worksheet_not_found`
-  - `fallback.available_sheets` populated from workbook inspection
-  - `fallback.suggested_sheet` best-effort match when possible
-
-### `runtime_observability`
-
-- Trigger: telemetry query requested.
-- Behavior: returns telemetry summary with failure and fallback distribution.
-- Failure mode: explicit IO diagnostic if telemetry file path does not exist.
-
-## Requirements for Outputs
-
-### All Excel files
-
-- **Professional Font**: Use a consistent, professional font (e.g., Arial, Times New Roman) for all deliverables.
-- **Zero Formula Errors**: Every Excel model MUST be delivered with ZERO formula errors (`#REF!`, `#DIV/0!`, `#VALUE!`, `#N/A`, `#NAME?`).
-- **Preserve Existing Templates**: Exactly match existing format, style, and conventions when modifying templates. Never impose standardized formatting on files with established patterns.
-
-### Formulas vs Hardcodes (CRITICAL RULE)
-
-- **Always use Excel formulas instead of calculating values and hardcoding them.** This ensures the spreadsheet remains dynamic and updateable.
-- Provide cell references instead of hardcoded values in formulas (e.g., use `=B5*(1+$B$6)` instead of `=B5*1.05`).
-- If you must add hardcoded inputs based on research, document them! Comment or place notes beside the table: `"Source: [Document], [Date], [Reference]"`.
-
-### Recalculating Formulas
-
-- ZeroCell includes formula recalculation capabilities through the `recalculate_workbook` tool (via LibreOffice headless). You **MUST** run this tool after applying patches that inject new formulas to ensure the workbook evaluates correctly and there are no `#VALUE!` or `#REF!` errors.
-- The public distribution ships the helper scripts under `scripts/`, and the binary resolves them relative to itself.
-- Windows recalculation does not rely on `AF_UNIX`; it uses the bundled helper path and native subprocess timeouts.
-- Override paths with `ZEROCELL_RECALC_SCRIPT` and `ZEROCELL_PYTHON_BIN` if your environment requires custom locations.
-
-### Financial Models
-
-#### Color Coding Standards
-
-- **Blue text**: Hardcoded inputs.
-- **Black text**: ALL formulas and calculations.
-- **Green text**: Links pulling from other worksheets within the same workbook.
-- **Red text**: External links to other files.
-- **Yellow background**: Key assumptions needing attention.
-
-#### Number Formatting Standards
-
-- **Years**: Format as text strings (e.g., `"2024"` not `"2,024"`).
-- **Currency**: ALWAYS specify units in headers (`"Revenue ($mm)"`).
-- **Zeros**: Use number formatting to make all zeros `-`, including percentages.
-- **Percentages**: Default to `0.0%` format (one decimal).
-
-## Changelog Policy Link
-
-See [CHANGELOG_POLICY.md](/Users/michaelwong/Developer/ZeroCell/docs/CHANGELOG_POLICY.md).
-
-## Release + Rollback Link
-
-See [RELEASES_AND_ROLLBACK.md](/Users/michaelwong/Developer/ZeroCell/docs/RELEASES_AND_ROLLBACK.md).
-
-## Migration + Compatibility Links
-
-- Migration assistant: [CONTRACT_MIGRATION.md](/Users/michaelwong/Developer/ZeroCell/docs/CONTRACT_MIGRATION.md)
-- Compatibility certification matrix outputs: `integration/reports/*/COMPATIBILITY_MATRIX.md`
-- Single-binary skill bundle guide: [distribution/README.md](/Users/michaelwong/Developer/ZeroCell/distribution/README.md)
+- This repository ships compiled binaries only.
+- macOS arm64, macOS x64, and Windows x64 binaries are current for schema `1.9.0`.
+- Windows ARM64 remains on the previous artifact until the missing cross compiler is installed.

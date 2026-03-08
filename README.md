@@ -1,21 +1,29 @@
 # ZeroCell Skill for OpenCode
 
-Welcome to the ZeroCell Skill repository.
+ZeroCell is the hardened public distribution of the Rust-based Excel skill used by AI agents.
 
-This repository contains the hardened, single-binary distribution of the ZeroCell Skill for OpenCode — injecting Excel AI matrix intelligence directly into your LLM workflow.
+## Current capability set
 
-## Key Features
+- Direct workbook-safe read, patch, validate, and apply flows
+- Native formula recalculation via headless LibreOffice
+- Bounded `query_sheet` responses for safer agent loops
+- Polars-backed schema inference and column profiling
+- Sheet and workbook anomaly scanning
+- Workbook-native `@agent` comment/task discovery
+- Task-state sync and task-context resolution
+- Source joins across sheets and named ranges
+- Runtime telemetry, environment doctoring, and project bootstrap
 
-- **Direct Cell Patching**: Patch Excel files cell-by-cell natively (e.g. `{"Sheet1": {"A1": "New Value", "B2": "=SUM(A1:A2)"}}`) without hallucinating massive 2D arrays.
-- **Native Formula Recalculation**: Force-evaluate complex spreadsheet models exactly like the Excel UI via the `recalculate_workbook` tool.
-- **Bounded Sheet Queries**: `query_sheet` accepts `workbook_path`/`sheet_name` aliases (`path`, `workbook`, `sheet`, `worksheet`) and clips no-range responses to a safe default window so agents do not loop on oversized output.
-- **Columnar Analytics Layer**: ZeroCell now uses Polars for bounded matrix analytics such as sparse extraction and inspection summaries, while keeping Excel read/write on the workbook-safe engine.
-- **Financial Validation & Inspection**: Validate formulas, extract parallel `values` and `formulas` matrices, and generate structural diffs before applying changes.
-- **Enterprise Controls**: Includes telemetry tracking, rollback policies, and PII-redacted safe-read operations.
+## Contract
+
+- Contract version: `2026.03`
+- Tool schema version: `1.9.0`
+- Minimum compatible tool schema version: `1.0.0`
 
 ## Installation
 
 Clone or download this repository:
+
 ```bash
 git clone https://github.com/tachyonlabshq/zerocell-pub.git
 cd zerocell-pub
@@ -25,7 +33,6 @@ The distribution includes the helper scripts used by `recalculate_workbook` unde
 
 ### macOS (Apple Silicon)
 
-Add to your project's `opencode.json`:
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
@@ -39,7 +46,6 @@ Add to your project's `opencode.json`:
 }
 ```
 
-Grant execute permission if needed:
 ```bash
 chmod +x bin/zerocell-macos-arm64
 ```
@@ -93,27 +99,19 @@ chmod +x bin/zerocell-macos-x64
 }
 ```
 
-> **Note for Windows users**: If SmartScreen warns you, click "More info" → "Run anyway".
+## Binary inventory
 
-## Available Binaries
+- `bin/zerocell-macos-arm64`
+- `bin/zerocell-macos-x64`
+- `bin/zerocell-windows-x64.exe`
+- `bin/zerocell-windows-arm64.exe`
 
-| File | Platform |
-|------|----------|
-| `bin/zerocell-macos-arm64` | macOS Apple Silicon (M1/M2/M3/M4) |
-| `bin/zerocell-macos-x64` | macOS Intel |
-| `bin/zerocell-windows-x64.exe` | Windows x64 |
-| `bin/zerocell-windows-arm64.exe` | Windows ARM64 (Copilot+ PCs) |
+## Notes
 
-## Recalculation Notes
-
-- `recalculate_workbook` requires LibreOffice plus Python.
-- Override the helper script path with `ZEROCELL_RECALC_SCRIPT` if needed.
-- Override the Python interpreter with `ZEROCELL_PYTHON_BIN` if needed.
-- Windows recalculation uses the bundled helper path and does not rely on `AF_UNIX`.
-
-## Query Tool Notes
-
-- Preferred MCP arguments: `workbook_path`, `sheet_name`, and a narrow `range`.
-- Accepted aliases: `workbook`, `path`, `file_path`, `sheet`, `worksheet`, `tab_name`.
-- Nested argument objects under `request`, `payload`, `input`, or `query` are accepted.
-- If `range` is omitted, `query_sheet` clips the response to a default `50 x 26` window and returns `bounded_by_default_window` plus `response_note`.
+- `query_sheet` accepts aliases such as `path`, `workbook`, `sheet`, and `worksheet`, but the stable contract remains `workbook_path` + `sheet_name`.
+- `profile_sheet`, `scan_sheet_anomalies`, `scan_workbook_anomalies`, and `join_sources` are the recommended planning tools before structural edits.
+- `join_sources` accepts sheet names directly and named ranges via `named:RangeName`.
+- `doctor` validates Python, LibreOffice, helper scripts, temp-dir access, and telemetry paths.
+- `init` generates local MCP config and a project-scoped skill stub under `.zerocell/`.
+- Windows recalculation does not rely on `AF_UNIX`.
+- Windows ARM64 binary has not been rebuilt in this publish step; it remains the previous artifact until the missing cross compiler is installed.
