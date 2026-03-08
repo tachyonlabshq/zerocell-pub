@@ -1,13 +1,13 @@
 {
-    "$schema": "https://opencode.ai/config.json",
-    "mcp": {
-        "zerocell": {
-            "type": "local",
-            "command": [
-                "./bin/zerocell-macos-arm64",
-                "mcp-stdio"
-            ],
-            "enabled": true
-        }
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "zerocell": {
+      "type": "local",
+      "command": [
+        "./bin/zerocell-macos-arm64",
+        "mcp-stdio"
+      ],
+      "enabled": true
     }
+  }
 }

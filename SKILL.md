@@ -80,5 +80,4 @@ This document defines the stable contract for using ZeroCell as an AI skill thro
 ## Publish Notes
 
 - This repository ships compiled binaries only.
-- macOS arm64, macOS x64, and Windows x64 binaries are current for schema `1.9.0`.
-- Windows ARM64 remains on the previous artifact until the missing cross compiler is installed.
+- Export this file from the main `ZeroCell` repository instead of editing it directly in the public package.

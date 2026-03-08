@@ -2,6 +2,16 @@
 Helper for running LibreOffice (soffice) in environments where AF_UNIX
 sockets may be blocked (e.g., sandboxed VMs). Detects the restriction
 at runtime and applies an LD_PRELOAD shim if needed on Unix-like systems.
+
+Usage:
+    from office.soffice import run_soffice, get_soffice_env
+
+    # Option 1 – run soffice directly
+    result = run_soffice(["--headless", "--convert-to", "pdf", "input.docx"])
+
+    # Option 2 – get env dict for your own subprocess calls
+    env = get_soffice_env()
+    subprocess.run(["soffice", ...], env=env)
 """
 
 import os
@@ -57,6 +67,7 @@ def run_soffice(args: list[str], **kwargs) -> subprocess.CompletedProcess:
     return subprocess.run([get_soffice_binary()] + args, env=env, **kwargs)
 
 
+
 _SHIM_SO = Path(tempfile.gettempdir()) / "lo_socket_shim.so"
 
 
@@ -93,6 +104,7 @@ def _ensure_shim() -> Path:
     return _SHIM_SO
 
 
+
 _SHIM_SOURCE = r"""
 #define _GNU_SOURCE
 #include <dlfcn.h>
@@ -110,11 +122,12 @@ static int (*real_accept)(int, struct sockaddr *, socklen_t *);
 static int (*real_close)(int);
 static int (*real_read)(int, void *, size_t);
 
+/* Per-FD bookkeeping (FDs >= 1024 are passed through unshimmed). */
 static int is_shimmed[1024];
 static int peer_of[1024];
-static int wake_r[1024];
-static int wake_w[1024];
-static int listener_fd = -1;
+static int wake_r[1024];            /* accept() blocks reading this */
+static int wake_w[1024];            /* close()  writes to this      */
+static int listener_fd = -1;        /* FD that received listen()    */
 
 __attribute__((constructor))
 static void init(void) {
@@ -131,10 +144,12 @@ static void init(void) {
     }
 }
 
+/* ---- socket ---------------------------------------------------------- */
 int socket(int domain, int type, int protocol) {
     if (domain == AF_UNIX) {
         int fd = real_socket(domain, type, protocol);
         if (fd >= 0) return fd;
+        /* socket(AF_UNIX) blocked – fall back to socketpair(). */
         int sv[2];
         if (real_socketpair(domain, type, protocol, sv) == 0) {
             if (sv[0] >= 0 && sv[0] < 1024) {
@@ -154,6 +169,7 @@ int socket(int domain, int type, int protocol) {
     return real_socket(domain, type, protocol);
 }
 
+/* ---- listen ---------------------------------------------------------- */
 int listen(int sockfd, int backlog) {
     if (sockfd >= 0 && sockfd < 1024 && is_shimmed[sockfd]) {
         listener_fd = sockfd;
@@ -162,8 +178,10 @@ int listen(int sockfd, int backlog) {
     return real_listen(sockfd, backlog);
 }
 
+/* ---- accept ---------------------------------------------------------- */
 int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen) {
     if (sockfd >= 0 && sockfd < 1024 && is_shimmed[sockfd]) {
+        /* Block until close() writes to the wake pipe. */
         if (wake_r[sockfd] >= 0) {
             char buf;
             real_read(wake_r[sockfd], &buf, 1);
@@ -174,12 +192,13 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen) {
     return real_accept(sockfd, addr, addrlen);
 }
 
+/* ---- close ----------------------------------------------------------- */
 int close(int fd) {
     if (fd >= 0 && fd < 1024 && is_shimmed[fd]) {
         int was_listener = (fd == listener_fd);
         is_shimmed[fd] = 0;
 
-        if (wake_w[fd] >= 0) {
+        if (wake_w[fd] >= 0) {              /* unblock accept() */
             char c = 0;
             write(wake_w[fd], &c, 1);
             real_close(wake_w[fd]);
@@ -189,15 +208,15 @@ int close(int fd) {
         if (peer_of[fd] >= 0) { real_close(peer_of[fd]); peer_of[fd] = -1; }
 
         if (was_listener)
-            _exit(0);
+            _exit(0);                        /* conversion done – exit */
     }
     return real_close(fd);
 }
 """
 
 
+
 if __name__ == "__main__":
     import sys
-
     result = run_soffice(sys.argv[1:])
     sys.exit(result.returncode)

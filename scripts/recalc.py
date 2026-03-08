@@ -161,7 +161,7 @@ def recalc(filename, timeout=30):
             if locations:
                 result["error_summary"][err_type] = {
                     "count": len(locations),
-                    "locations": locations[:20],
+                    "locations": locations[:20],  
                 }
 
         wb_formulas = load_workbook(filename, data_only=False)

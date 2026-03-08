@@ -46,10 +46,6 @@ The distribution includes the helper scripts used by `recalculate_workbook` unde
 }
 ```
 
-```bash
-chmod +x bin/zerocell-macos-arm64
-```
-
 ### macOS (Intel)
 
 ```json
@@ -63,10 +59,6 @@ chmod +x bin/zerocell-macos-arm64
     }
   }
 }
-```
-
-```bash
-chmod +x bin/zerocell-macos-x64
 ```
 
 ### Windows (x64)
@@ -114,4 +106,8 @@ chmod +x bin/zerocell-macos-x64
 - `doctor` validates Python, LibreOffice, helper scripts, temp-dir access, and telemetry paths.
 - `init` generates local MCP config and a project-scoped skill stub under `.zerocell/`.
 - Windows recalculation does not rely on `AF_UNIX`.
-- Windows ARM64 binary has not been rebuilt in this publish step; it remains the previous artifact until the missing cross compiler is installed.
+- Windows ARM64 binary may remain on the previous artifact when the cross compiler is unavailable.
+
+## Source of truth
+
+`ZeroCell` is the source repository for these assets. This public package should be exported from the main repo rather than edited by hand.
