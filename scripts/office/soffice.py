@@ -22,6 +22,9 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+_SOCKET_AF_UNIX = getattr(socket, "AF_UNIX", None)
+_SOCKET_STREAM = getattr(socket, "SOCK_STREAM", None)
+
 
 def get_soffice_env() -> dict:
     env = os.environ.copy()
@@ -75,11 +78,11 @@ def _needs_shim() -> bool:
     if platform.system() == "Windows":
         return False
 
-    if not hasattr(socket, "AF_UNIX"):
+    if _SOCKET_AF_UNIX is None or _SOCKET_STREAM is None:
         return False
 
     try:
-        s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        s = socket.socket(_SOCKET_AF_UNIX, _SOCKET_STREAM)
         s.close()
         return False
     except OSError:
