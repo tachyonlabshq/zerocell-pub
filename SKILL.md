@@ -7,7 +7,7 @@ This document defines the stable contract for using ZeroCell as an AI skill thro
 ## Version Contract
 
 - Contract version: `2026.03`
-- Tool schema version: `1.9.0`
+- Tool schema version: `1.9.1`
 - Minimum compatible tool schema version: `1.0.0`
 - Patch schema version: `1.0`
 - Compatibility model: additive fields in minor versions, breaking changes only in major versions.

@@ -17,7 +17,7 @@ ZeroCell is the hardened public distribution of the Rust-based Excel skill used 
 ## Contract
 
 - Contract version: `2026.03`
-- Tool schema version: `1.9.0`
+- Tool schema version: `1.9.1`
 - Minimum compatible tool schema version: `1.0.0`
 
 ## Installation
